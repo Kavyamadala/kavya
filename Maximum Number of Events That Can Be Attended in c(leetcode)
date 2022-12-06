@@ -1,0 +1,34 @@
+int maxEvents(int** events, int eventsSize, int* eventsColSize){
+class Solution {
+public int maxEvents(int[][] da) {
+        
+    PriorityQueue<Integer> pq = new PriorityQueue<Integer>();
+     Arrays.sort(da, (a,b) -> Integer.compare(a[0], b[0]));
+        
+     int i =0, res = 0, n = da.length;
+        
+    for(int d = 1; d<= 100000; d++){
+            
+            
+    while(!pq.isEmpty() && pq.peek() < d){
+                
+                
+               pq.poll();
+            }
+            
+            while(i < n && da[i][0] == d)
+                
+                pq.offer(da[i++][1]);
+            
+            if(!pq.isEmpty()){
+               
+                pq.poll();
+                res++;
+            }
+        }
+        
+        
+        return res;
+    }
+}
+}
