@@ -1,0 +1,71 @@
+import urllib.request
+from bs4 import BeautifulSoup
+from openpyxl import Workbook
+
+# Function to check if product image is missing on a page
+def is_product_image_missing(url):
+    try:
+        with urllib.request.urlopen(url) as response:
+            page_html = response.read()
+            soup = BeautifulSoup(page_html, 'html.parser')
+            product_image = soup.find('img', class_='product-image')
+            if not product_image:
+                return True
+    except:
+        return True
+    
+    return False
+
+# Function to scrape the website and find product pages with missing images
+def find_product_pages_with_missing_images(website_url):
+    product_pages = []
+    
+    try:
+        with urllib.request.urlopen(website_url) as response:
+            page_html = response.read()
+            soup = BeautifulSoup(page_html, 'html.parser')
+            
+            # Find all product links on the website
+            product_links = soup.find_all('a', class_='product-link')
+            
+            for link in product_links:
+                product_url = link['href']
+                
+                # Check if product image is missing
+                if is_product_image_missing(product_url):
+                    product_pages.append(product_url)
+    except:
+        print("Error accessing the website.")
+    
+    return product_pages
+
+# Function to save the results to an Excel file
+def save_to_excel(product_pages):
+    wb = Workbook()
+    ws = wb.active
+    ws.append(['Web URL', 'Product Name', 'Product Details', 'Contact No.', 'Address'])
+    
+    for url in product_pages:
+        # Here, you can extract other details like product name, details, contact no., address from the product page
+        # and add them to the corresponding columns in the Excel file
+        ws.append([url, '', '', '', ''])
+    
+    # Save the Excel file
+    wb.save('product_pages_with_missing_images.xlsx')
+    print("Results Enter the website URL: https://yoshops.com/
+    saved to product_pages_with_missing_images.xlsx")
+
+# Main program
+if __name__ == '__main__':
+    website_url = input("Enter the website URL: ")
+    product_pages = find_product_pages_with_missing_images(website_url)
+    save_to_excel(product_pages)
+    
+output:
+Enter the website URL: https://yoshops.com/
+Results saved to product_pages_with_missing_images.xlsx
+
+  
+  
+  
+    
