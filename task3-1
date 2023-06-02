@@ -1,0 +1,78 @@
+import urllib.request
+from bs4 import BeautifulSoup
+import openpyxl
+
+def find_product_pages(url):
+    # Fetch the webpage content using urllib
+    try:
+        with urllib.request.urlopen(url) as response:
+            html_content = response.read()
+    except urllib.error.URLError as e:
+        print("Error: Failed to fetch webpage -", e)
+        return
+    
+    soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # Find all the product links on the webpage
+    product_links = soup.find_all('a', class_='product-link')
+    
+    products_data = []
+    
+    for link in product_links:
+        product_url = link['href']
+        
+        # Fetch the individual product page using urllib
+        try:
+            with urllib.request.urlopen(product_url) as product_response:
+                product_html = product_response.read()
+        except urllib.error.URLError as e:
+            print("Error: Failed to fetch product page -", e)
+            continue
+        
+        product_soup = BeautifulSoup(product_html, 'html.parser')
+        
+        # Check if the product image is missing
+        product_image = product_soup.find('img', class_='product-image')
+        if product_image is None:
+            # Extract other product details
+            product_name = product_soup.find('h1', class_='product-name').text.strip()
+            product_details = product_soup.find('div', class_='product-details').text.strip()
+            contact_info = product_soup.find('div', class_='contact-info').text.strip()
+            address = product_soup.find('div', class_='address').text.strip()
+            
+            # Append the data to the list
+            products_data.append({
+                'Web URL': product_url,
+                'Product Name': product_name,
+                'Product Details': product_details,
+                'Contact Number': contact_info,
+                'Address': address
+            })
+    
+    # Create an Excel file and write the data
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(['Web URL', 'Product Name', 'Product Details', 'Contact Number', 'Address'])
+    
+    for data in products_data:
+        ws.append([data['Web URL'], data['Product Name'], data['Product Details'], data['Contact Number'], data['Address']])
+    
+    wb.save('product_pages.xlsx')
+    print("Excel file created successfully!")
+
+# Main program
+input_value = input("Enter 1 for Input value = https://yoshops.com/ \nEnter 2 for Input value = Any main categories and subcategories Link: ")
+
+if input_value == '1':
+    find_product_pages('https://yoshops.com/')
+elif input_value == '2':
+    url = input("Enter the URL: ")
+    find_product_pages(url)
+else:
+    print("Invalid input!")
+   
+   
+ output:
+ Enter 1 for Input value = https://yoshops.com/ 
+Enter 2 for Input value = Any main categories and subcategories Link: https://yoshops.com/t/irons
+Invalid input!
